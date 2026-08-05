@@ -11,6 +11,7 @@ from app.models.chat import ChatRequest
 from app.services.chat_service import chat_with_repository
 from app.models.github import GitHubRequest
 from app.services.github_service import clone_repository
+from app.rag.indexer import build_index
 
 app = FastAPI(
     title="RepoMind AI",
@@ -61,6 +62,8 @@ async def upload_repository(file: UploadFile = File(...)):
 
     analysis = analyze_repository(tree, files)
 
+    build_index(extract_path)
+
     analysis["repository"] = file.filename
     analysis["repo_id"] = repo_id
 
@@ -81,6 +84,7 @@ async def analyze_github_repository(request: GitHubRequest):
         tree,
         files,
     )
+    build_index(repo_path)
 
     analysis["repository"] = request.github_url.split("/")[-1]
     analysis["repo_id"] = repo_id

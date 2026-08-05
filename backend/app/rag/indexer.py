@@ -1,6 +1,7 @@
 import os
 import faiss
 import numpy as np
+import pickle
 
 from app.rag.embedder import get_embedding
 
@@ -139,5 +140,16 @@ def build_index(repo_path):
     )
 
     index.add(embeddings)
+
+    faiss.write_index(
+       index,
+       os.path.join(repo_path, "index.faiss")
+)
+
+    with open(
+        os.path.join(repo_path, "metadata.pkl"),
+        "wb",
+)   as f:
+      pickle.dump(metadata, f)
 
     return index, metadata
