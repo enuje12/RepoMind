@@ -112,7 +112,10 @@ def build_index(repo_path):
 
             for chunk in chunks:
 
-                embedding = get_embedding(chunk)
+                embedding = np.array(
+                get_embedding(chunk),
+                dtype="float32",
+                 ) 
 
                 embeddings.append(embedding)
 
