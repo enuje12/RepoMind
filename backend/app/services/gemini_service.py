@@ -1,10 +1,13 @@
 import os
 import json
+import time
 
 from dotenv import load_dotenv
 from openai import OpenAI
 
 load_dotenv()
+
+
 
 client = OpenAI(
     api_key=os.getenv("OPENROUTER_API_KEY"),
@@ -220,6 +223,12 @@ Provide a numbered list of practical improvements.
 Provide a concise evaluation of the repository's architecture, maintainability, production readiness, and portfolio quality.
 """
 
+    print("Tree length:", len(tree))
+    print("Files length:", len(files))
+    print("Prompt length:", len(prompt))
+
+    start = time.time()
+
     response = client.chat.completions.create(
         model="openai/gpt-oss-20b:free",
         messages=[
@@ -229,13 +238,16 @@ Provide a concise evaluation of the repository's architecture, maintainability, 
             }
         ]
     )
+
+    print("OpenRouter took:", round(time.time() - start, 2), "seconds")
+
     print(response.model_dump_json(indent=2))
 
     result = response.choices[0].message.content
 
     if result is None:
-      print(response.model_dump_json(indent=2))
-      raise Exception("Model returned no content.")
+        print(response.model_dump_json(indent=2))
+        raise Exception("Model returned no content.")
 
     result = result.replace("```json", "")
     result = result.replace("```", "")
@@ -243,4 +255,4 @@ Provide a concise evaluation of the repository's architecture, maintainability, 
 
     data = json.loads(result)
 
-    return data  
+    return data

@@ -15,10 +15,16 @@ client = OpenAI(
 
 def chat_with_repository(repo_path: str, question: str):
 
-    files = retrieve_relevant_files(
+    try:
+        files = retrieve_relevant_files(
         repo_path,
         question
     )
+    except Exception:
+        return {
+        "answer": "The repository is still being indexed. Please wait a few seconds and try again.",
+        "sources": []
+    }
 
     context = ""
 

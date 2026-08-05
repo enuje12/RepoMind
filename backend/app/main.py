@@ -12,6 +12,7 @@ from app.services.chat_service import chat_with_repository
 from app.models.github import GitHubRequest
 from app.services.github_service import clone_repository
 from app.rag.indexer import build_index
+from fastapi import BackgroundTasks
 
 app = FastAPI(
     title="RepoMind AI",
@@ -44,7 +45,10 @@ async def home():
 
 
 @app.post("/upload")
-async def upload_repository(file: UploadFile = File(...)):
+async def upload_repository(
+    background_tasks: BackgroundTasks,
+    file: UploadFile = File(...),
+):
     repo_id = str(uuid.uuid4())
 
     zip_path = os.path.join(UPLOAD_FOLDER, f"{repo_id}.zip")
@@ -58,11 +62,16 @@ async def upload_repository(file: UploadFile = File(...)):
 
     tree = generate_tree(extract_path)
 
+    tree = tree[:4000]
+
     files = read_important_files(extract_path)
 
     analysis = analyze_repository(tree, files)
 
-    build_index(extract_path)
+    background_tasks.add_task(
+        build_index,
+        extract_path,
+)
 
     analysis["repository"] = file.filename
     analysis["repo_id"] = repo_id
@@ -70,7 +79,10 @@ async def upload_repository(file: UploadFile = File(...)):
     return analysis
 
 @app.post("/github")
-async def analyze_github_repository(request: GitHubRequest):
+async def analyze_github_repository(
+    request: GitHubRequest,
+    background_tasks: BackgroundTasks,
+):
 
     repo_id, repo_path = clone_repository(
         request.github_url
@@ -78,13 +90,19 @@ async def analyze_github_repository(request: GitHubRequest):
 
     tree = generate_tree(repo_path)
 
+    tree = tree[:4000]
+
     files = read_important_files(repo_path)
 
     analysis = analyze_repository(
         tree,
         files,
     )
-    build_index(repo_path)
+
+    background_tasks.add_task(
+        build_index,
+        repo_path,
+    )
 
     analysis["repository"] = request.github_url.split("/")[-1]
     analysis["repo_id"] = repo_id

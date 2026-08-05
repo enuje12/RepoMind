@@ -12,8 +12,11 @@ IMPORTANT_FILES = {
     "main.py",
     "app.py",
     "App.tsx",
-    "main.tsx"
+    "main.tsx",
 }
+
+MAX_FILES = 10
+MAX_CHARS = 800
 
 
 def read_important_files(root_path):
@@ -21,24 +24,38 @@ def read_important_files(root_path):
 
     for root, _, files in os.walk(root_path):
         for file in files:
-            if file in IMPORTANT_FILES:
-                path = os.path.join(root, file)
 
-                try:
-                    with open(path, "r", encoding="utf-8") as f:
-                        content = f.read(2000)
+            if len(files_data) >= MAX_FILES:
+                break
 
-                    files_data.append(
-                        f"""
+            if file not in IMPORTANT_FILES:
+                continue
+
+            path = os.path.join(root, file)
+
+            try:
+                with open(
+                    path,
+                    "r",
+                    encoding="utf-8",
+                    errors="ignore",
+                ) as f:
+                    content = f.read(MAX_CHARS)
+
+                files_data.append(
+                    f"""
 FILE: {file}
 
 {content}
 
-{'='*80}
+{'=' * 80}
 """
-                    )
+                )
 
-                except Exception:
-                    pass
+            except Exception:
+                continue
+
+        if len(files_data) >= MAX_FILES:
+            break
 
     return "\n".join(files_data)
