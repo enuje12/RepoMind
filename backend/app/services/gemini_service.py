@@ -253,6 +253,12 @@ Provide a concise evaluation of the repository's architecture, maintainability, 
     result = result.replace("```", "")
     result = result.strip()
 
-    data = json.loads(result)
+    try:
+        data = json.loads(result)
+    except json.JSONDecodeError:
+        print("========== RAW MODEL RESPONSE ==========")
+        print(result)
+        print("========================================")
+        raise
 
     return data
