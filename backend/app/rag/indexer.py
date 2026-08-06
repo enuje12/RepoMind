@@ -6,27 +6,11 @@ import pickle
 from app.rag.embedder import get_embedding
 
 IMPORTANT_EXTENSIONS = {
-    ".py",
-    ".js",
-    ".ts",
-    ".tsx",
-    ".jsx",
-    ".java",
-    ".cs",
-    ".csproj",
-    ".cpp",
-    ".c",
-    ".go",
-    ".rs",
-    ".php",
-    ".html",
-    ".css",
-    ".json",
-    ".md",
-    ".xml",
-    ".config",
-    ".yml",
-    ".yaml",
+    ".py", ".js", ".ts", ".tsx", ".jsx",
+    ".java", ".cs", ".csproj", ".cpp", ".c",
+    ".go", ".rs", ".php", ".html", ".css",
+    ".json", ".md", ".xml", ".config",
+    ".yml", ".yaml",
 }
 
 IGNORE_DIRS = {
@@ -48,18 +32,23 @@ IGNORE_FILES = {
     "pnpm-lock.yaml",
 }
 
-CHUNK_SIZE = 800
-OVERLAP = 150
+CHUNK_SIZE = 1000
+OVERLAP = 100
+MAX_FILE_SIZE = 200000
+MAX_FILE_CHARS = 12000
 
 
-def chunk_text(text: str):
+def chunk_text(text):
     chunks = []
 
     start = 0
 
     while start < len(text):
+
         end = start + CHUNK_SIZE
+
         chunks.append(text[start:end])
+
         start += CHUNK_SIZE - OVERLAP
 
     return chunks
@@ -67,8 +56,19 @@ def chunk_text(text: str):
 
 def build_index(repo_path):
 
-    embeddings = []
-    metadata = []
+    index_file = os.path.join(repo_path, "index.faiss")
+    metadata_file = os.path.join(repo_path, "metadata.pkl")
+
+    if os.path.exists(index_file) and os.path.exists(metadata_file):
+
+        index = faiss.read_index(index_file)
+
+        with open(metadata_file, "rb") as f:
+            metadata = pickle.load(f)
+
+        return index, metadata
+
+    all_chunks = []
 
     for root, dirs, files in os.walk(repo_path):
 
@@ -82,10 +82,7 @@ def build_index(repo_path):
             if file in IGNORE_FILES:
                 continue
 
-            if file.endswith(".min.js"):
-                continue
-
-            if file.endswith(".min.css"):
+            if file.endswith(".min.js") or file.endswith(".min.css"):
                 continue
 
             ext = os.path.splitext(file)[1].lower()
@@ -96,44 +93,47 @@ def build_index(repo_path):
             path = os.path.join(root, file)
 
             try:
+
+                if os.path.getsize(path) > MAX_FILE_SIZE:
+                    continue
+
                 with open(
                     path,
                     "r",
                     encoding="utf-8",
                     errors="ignore",
                 ) as f:
-                    content = f.read()
+
+                    content = f.read(MAX_FILE_CHARS)
+
             except Exception:
                 continue
 
             if len(content.strip()) < 20:
                 continue
 
-            chunks = chunk_text(content)
+            for chunk in chunk_text(content):
 
-            for chunk in chunks:
-
-                embedding = np.array(
-                get_embedding(chunk),
-                dtype="float32",
-                 ) 
-
-                embeddings.append(embedding)
-
-                metadata.append(
+                all_chunks.append(
                     {
                         "path": path,
                         "content": chunk,
                     }
                 )
 
-    if len(embeddings) == 0:
+    if not all_chunks:
         raise ValueError("No files found to index.")
 
+    vectors = get_embedding(
+        [c["content"] for c in all_chunks]
+    )
+
     embeddings = np.array(
-        embeddings,
+        vectors,
         dtype="float32",
     )
+
+    metadata = all_chunks
 
     index = faiss.IndexFlatIP(
         embeddings.shape[1]
@@ -142,14 +142,18 @@ def build_index(repo_path):
     index.add(embeddings)
 
     faiss.write_index(
-       index,
-       os.path.join(repo_path, "index.faiss")
-)
+        index,
+        index_file,
+    )
 
     with open(
-        os.path.join(repo_path, "metadata.pkl"),
+        metadata_file,
         "wb",
-)   as f:
-      pickle.dump(metadata, f)
+    ) as f:
+
+        pickle.dump(
+            metadata,
+            f,
+        )
 
     return index, metadata
