@@ -11,7 +11,7 @@ def semantic_search(
 ):
 
     query_embedding = np.array(
-        [get_embedding(question)],
+        get_embedding(question),
         dtype="float32",
     )
 

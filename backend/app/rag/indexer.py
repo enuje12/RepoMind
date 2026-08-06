@@ -44,11 +44,8 @@ def chunk_text(text):
     start = 0
 
     while start < len(text):
-
         end = start + CHUNK_SIZE
-
         chunks.append(text[start:end])
-
         start += CHUNK_SIZE - OVERLAP
 
     return chunks
@@ -60,6 +57,8 @@ def build_index(repo_path):
     metadata_file = os.path.join(repo_path, "metadata.pkl")
 
     if os.path.exists(index_file) and os.path.exists(metadata_file):
+
+        print("Using existing FAISS index.")
 
         index = faiss.read_index(index_file)
 
@@ -112,7 +111,9 @@ def build_index(repo_path):
             if len(content.strip()) < 20:
                 continue
 
-            for chunk in chunk_text(content):
+            chunks = chunk_text(content)
+
+            for chunk in chunks:
 
                 all_chunks.append(
                     {
@@ -124,9 +125,14 @@ def build_index(repo_path):
     if not all_chunks:
         raise ValueError("No files found to index.")
 
+    print("Collected chunks:", len(all_chunks))
+    print("Generating embeddings...")
+
     vectors = get_embedding(
         [c["content"] for c in all_chunks]
     )
+
+    print("Embeddings generated.")
 
     embeddings = np.array(
         vectors,
@@ -135,16 +141,22 @@ def build_index(repo_path):
 
     metadata = all_chunks
 
+    print("Creating FAISS index...")
+
     index = faiss.IndexFlatIP(
         embeddings.shape[1]
     )
 
     index.add(embeddings)
 
+    print("Writing index.faiss...")
+
     faiss.write_index(
         index,
         index_file,
     )
+
+    print("Saving metadata.pkl...")
 
     with open(
         metadata_file,
@@ -155,5 +167,7 @@ def build_index(repo_path):
             metadata,
             f,
         )
+
+    print("Index build complete.")
 
     return index, metadata

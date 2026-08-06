@@ -17,14 +17,18 @@ def chat_with_repository(repo_path: str, question: str):
 
     try:
         files = retrieve_relevant_files(
-        repo_path,
-        question
-    )
-    except Exception:
+            repo_path,
+            question,
+        )
+
+    except Exception as e:
+
+        print("Retriever error:", str(e))
+
         return {
-        "answer": "The repository is still being indexed. Please wait a few seconds and try again.",
-        "sources": []
-    }
+            "answer": str(e),
+            "sources": [],
+        }
 
     context = ""
 
@@ -45,8 +49,7 @@ You are an expert software engineer.
 
 Answer ONLY from the repository context.
 
-If the answer cannot be found,
-say that the repository does not contain enough information.
+If the answer cannot be found, say that the repository does not contain enough information.
 
 Repository Context
 
@@ -58,13 +61,13 @@ Question
 """
 
     response = client.chat.completions.create(
-        model="openrouter/free",
+        model="openai/gpt-oss-20b:free",
         messages=[
             {
                 "role": "user",
-                "content": prompt
+                "content": prompt,
             }
-        ]
+        ],
     )
 
     return {
@@ -72,5 +75,5 @@ Question
         "sources": [
             os.path.basename(file["path"])
             for file in files
-        ]
+        ],
     }
