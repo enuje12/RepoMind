@@ -26,7 +26,7 @@ def chat_with_repository(repo_path: str, question: str):
         print("Retriever error:", str(e))
 
         return {
-            "answer": str(e),
+            "answer": "Unable to answer your question.",
             "sources": [],
         }
 

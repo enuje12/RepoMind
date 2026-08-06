@@ -68,10 +68,7 @@ async def upload_repository(
 
     analysis = analyze_repository(tree, files)
 
-    background_tasks.add_task(
-        build_index,
-        extract_path,
-)
+    build_index(extract_path)
 
     analysis["repository"] = file.filename
     analysis["repo_id"] = repo_id
@@ -99,10 +96,7 @@ async def analyze_github_repository(
         files,
     )
 
-    background_tasks.add_task(
-        build_index,
-        repo_path,
-    )
+    build_index(repo_path)
 
     analysis["repository"] = request.github_url.split("/")[-1]
     analysis["repo_id"] = repo_id
