@@ -18,3 +18,12 @@ frontend/.env
 Thumbs.db
 
 *.zip
+
+# Environment variables
+backend/.env
+frontend/.env
+
+# Optional
+*.env
+.env
+.env.local
