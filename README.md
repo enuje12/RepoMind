@@ -13,7 +13,6 @@ Analyze any public GitHub repository or ZIP project using Large Language Models 
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)
 ![OpenRouter](https://img.shields.io/badge/OpenRouter-LLM-purple)
-![FAISS](https://img.shields.io/badge/FAISS-Vector%20Search-orange)
 ![Render](https://img.shields.io/badge/Render-Backend-46E3B7)
 ![Vercel](https://img.shields.io/badge/Vercel-Frontend-black)
 
