@@ -5,7 +5,6 @@ import RightPanel from "../../components/RightPanel/RightPanel";
 import FeatureCard from "../../components/FeatureCard/FeatureCard";
 import Badge from "../../components/Badge/Badge";
 import MarkdownViewer from "../../components/MarkdownViewer/MarkdownViewer";
-import ChatBox from "../../components/ChatBox/ChatBox";
 import ExportButtons from "../../components/ExportButtons/ExportButtons";
 
 function Dashboard() {
@@ -150,9 +149,8 @@ function Dashboard() {
 
 </div>
 
-        <div id="chat">
-  <ChatBox repoId={data.repo_id} />
-</div>
+     
+  
 
       </main>
 

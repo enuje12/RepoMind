@@ -7,11 +7,8 @@ from app.services.gemini_service import analyze_repository
 from app.parser.repo_parser import generate_tree
 from app.parser.file_reader import read_important_files
 from fastapi.middleware.cors import CORSMiddleware
-from app.models.chat import ChatRequest
-from app.services.chat_service import chat_with_repository
 from app.models.github import GitHubRequest
 from app.services.github_service import clone_repository
-from app.rag.indexer import build_index
 from fastapi import BackgroundTasks
 
 app = FastAPI(
@@ -68,7 +65,7 @@ async def upload_repository(
 
     analysis = analyze_repository(tree, files)
 
-    build_index(extract_path)
+   
 
     analysis["repository"] = file.filename
     analysis["repo_id"] = repo_id
@@ -96,24 +93,10 @@ async def analyze_github_repository(
         files,
     )
 
-    build_index(repo_path)
+  
 
     analysis["repository"] = request.github_url.split("/")[-1]
     analysis["repo_id"] = repo_id
 
     return analysis
 
-@app.post("/chat")
-async def chat(request: ChatRequest):
-
-    repo_path = os.path.join(
-        UPLOAD_FOLDER,
-        request.repo_id,
-    )
-
-    result = chat_with_repository(
-        repo_path,
-        request.question,
-    )
-
-    return result
