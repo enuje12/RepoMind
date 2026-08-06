@@ -9,7 +9,7 @@ from app.parser.file_reader import read_important_files
 from fastapi.middleware.cors import CORSMiddleware
 from app.models.github import GitHubRequest
 from app.services.github_service import clone_repository
-from fastapi import BackgroundTasks
+
 
 app = FastAPI(
     title="RepoMind AI",
@@ -43,7 +43,7 @@ async def home():
 
 @app.post("/upload")
 async def upload_repository(
-    background_tasks: BackgroundTasks,
+    
     file: UploadFile = File(...),
 ):
     repo_id = str(uuid.uuid4())
@@ -75,7 +75,7 @@ async def upload_repository(
 @app.post("/github")
 async def analyze_github_repository(
     request: GitHubRequest,
-    background_tasks: BackgroundTasks,
+    
 ):
 
     repo_id, repo_path = clone_repository(
