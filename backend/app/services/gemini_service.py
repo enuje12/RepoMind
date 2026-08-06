@@ -241,13 +241,10 @@ Provide a concise evaluation of the repository's architecture, maintainability, 
 
     print("OpenRouter took:", round(time.time() - start, 2), "seconds")
 
-    print(response.model_dump_json(indent=2))
-
     result = response.choices[0].message.content
 
     if result is None:
-        print(response.model_dump_json(indent=2))
-        raise Exception("Model returned no content.")
+     raise Exception("Model returned no content.")
 
     result = result.replace("```json", "")
     result = result.replace("```", "")

@@ -6,6 +6,7 @@ import FeatureCard from "../../components/FeatureCard/FeatureCard";
 import Badge from "../../components/Badge/Badge";
 import MarkdownViewer from "../../components/MarkdownViewer/MarkdownViewer";
 import ExportButtons from "../../components/ExportButtons/ExportButtons";
+import WorkflowExplorer from "../../components/WorkflowExplorer/WorkflowExplorer";
 
 function Dashboard() {
   const location = useLocation();
@@ -126,6 +127,8 @@ function Dashboard() {
 
         <div id="analysis" className="mt-12">
 
+          </div>
+
   <div className="mb-6 flex items-center justify-between">
   <div>
     <h2 className="text-3xl font-bold">
@@ -147,6 +150,8 @@ function Dashboard() {
   content={data.analysis}
 />
 
+<div id="workflow" className="mt-12">
+  <WorkflowExplorer repoId={data.repo_id} />
 </div>
 
      
@@ -161,5 +166,7 @@ function Dashboard() {
     </div>
   );
 }
+
+
 
 export default Dashboard;

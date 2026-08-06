@@ -9,6 +9,9 @@ from app.parser.file_reader import read_important_files
 from fastapi.middleware.cors import CORSMiddleware
 from app.models.github import GitHubRequest
 from app.services.github_service import clone_repository
+from app.models.workflow import WorkflowRequest
+from app.services.workflow_service import explain_workflow
+
 
 
 app = FastAPI(
@@ -100,3 +103,17 @@ async def analyze_github_repository(
 
     return analysis
 
+@app.post("/workflow")
+async def workflow(request: WorkflowRequest):
+
+    repo_path = os.path.join(
+        UPLOAD_FOLDER,
+        request.repo_id,
+    )
+
+    result = explain_workflow(
+        repo_path,
+        request.workflow,
+    )
+
+    return result

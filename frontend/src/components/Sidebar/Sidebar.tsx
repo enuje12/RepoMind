@@ -20,7 +20,7 @@ function Sidebar() {
   };
 
   useEffect(() => {
-    const sections = ["dashboard", "repository", "analysis", "chat"];
+    const sections = ["dashboard", "repository", "analysis", "workflow"];
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -102,15 +102,15 @@ function Sidebar() {
           </button>
 
           <button
-            onClick={() => scrollToSection("chat")}
+            onClick={() => scrollToSection("workflow")}
             className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 font-medium transition ${
-              active === "chat"
+              active === "workflow"
                 ? "bg-indigo-600 text-white"
                 : "text-slate-300 hover:bg-slate-800"
             }`}
           >
             <MessageSquare size={20} />
-            Chat
+            Workflow AI
           </button>
 
         </nav>
